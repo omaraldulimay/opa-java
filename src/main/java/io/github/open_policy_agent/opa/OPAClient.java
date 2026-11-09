@@ -60,7 +60,9 @@ public class OPAClient {
     // Values to use when generating requests.
     private boolean policyRequestPretty;
     private boolean policyRequestProvenance;
-    private Explain policyRequestExplain = Explain.NOTES;
+    // Explain is off by default: any other value makes OPA record a full trace
+    // of every evaluation, which is expensive for non-trivial policies.
+    private Optional<Explain> policyRequestExplain = Optional.empty();
     private boolean policyRequestMetrics;
     private boolean policyRequestInstrument;
     private boolean policyRequestStrictBuiltinErrors;
@@ -132,6 +134,17 @@ public class OPAClient {
      */
     public OPAClient(OpaApiClient client) {
         this.sdk = client;
+    }
+
+    /**
+     * Sets the explain mode sent with policy evaluation requests. By default
+     * no explain parameter is sent, since enabling it makes OPA trace every
+     * evaluation, which can use a lot of memory.
+     *
+     * @param explain explain mode to request, or null to disable explain.
+     */
+    public void setExplain(Explain explain) {
+        this.policyRequestExplain = Optional.ofNullable(explain);
     }
 
     private Optional<Input> defaultInput() {
